@@ -5,7 +5,7 @@ import com.shenxu.cn.client.DataLakeClient;
 
 public class RestsOperation {
     public static void main(String[] args) {
-        String dataLakeIp = "hadoop101";
+        String dataLakeIp = "12.0.0.1";
         int dataLakePort = 7853;
 
         try {

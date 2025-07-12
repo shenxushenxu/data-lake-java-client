@@ -61,7 +61,6 @@ public class DataLakeClient {
         data_array.add(lineData.toJSONString());
     }
 
-
     /**
      * 执行插入的方法
      *

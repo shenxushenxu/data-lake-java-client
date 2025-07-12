@@ -69,7 +69,6 @@ public class DataLakeStreamClient {
 
     public List<DataLakeStreamData> load() throws Exception {
 
-
         if (TableName == null || "".equals(TableName)) {
             throw new Exception("TableName 为 null");
         }

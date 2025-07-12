@@ -30,7 +30,7 @@ public class BatchInsert {
 
         System.out.println("数据准备完成。。。。。。");
         long start_date = new Date().getTime();
-        // 直接插入 table_name 表内
+        // 直接插入table_name 表
         dataLakeClient.execute("table_name");
 
         // 指定0分区，插入table_name表内

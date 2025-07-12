@@ -3,7 +3,6 @@ package com.shenxu.cn.entity;
 import com.alibaba.fastjson.JSONObject;
 
 public class DataLakeStreamData {
-
     private String tableName;
     private String majorValue;
     private String crudType;

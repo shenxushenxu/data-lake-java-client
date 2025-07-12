@@ -16,10 +16,10 @@ public class StreamConsume {
         while (true){
             List<DataLakeStreamData> list = dataLakeStreamClient.load();
 
-            for (DataLakeStreamData dataLakeStreamData : list){
+            for (DataLakeStreamData dataLakeData : list){
 
 
-                System.out.println(dataLakeStreamData);
+                System.out.println(dataLakeData);
             }
         }
 

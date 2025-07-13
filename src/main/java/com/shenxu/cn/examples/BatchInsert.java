@@ -25,7 +25,11 @@ public class BatchInsert {
             lineData.put("username", "data-lake");
             lineData.put("age", String.valueOf(i));
             lineData.put("xingbie", String.valueOf(i));
-            dataLakeClient.insert(lineData);
+            // 标识 lineData 数据的操作属性
+            lineData.insert();
+//            lineData.delete();
+
+            dataLakeClient.putLineData(lineData);
         }
 
         System.out.println("数据准备完成。。。。。。");

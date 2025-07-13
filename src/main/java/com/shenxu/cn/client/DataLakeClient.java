@@ -21,7 +21,7 @@ public class DataLakeClient {
     private DataInputStream in;
     //    private String tableName;
     private JSONArray data_array;
-    private String insert_key = "_crud_type";
+
 
 
     public DataLakeClient(String DataLakeIp, int DataLakePort) throws IOException {
@@ -32,32 +32,12 @@ public class DataLakeClient {
         in = new DataInputStream(socket.getInputStream());
     }
 
-    /**
-     * 设置表需要插入表的名字
-     * @param tableName
-     */
-//    public void setTableName(String tableName) {
-//        this.tableName = tableName;
-//    }
 
     /**
-     * 如果是insert数据就把LineData 的对象放到这里面
-     *
+     * 将 line 放置到 批中
      * @param lineData
      */
-    public void insert(LineData lineData) {
-
-        lineData.put(insert_key, "insert");
-        data_array.add(lineData.getJsonObject());
-    }
-
-    /**
-     * 如果是delete数据就把LineData 的对象放到这里面
-     *
-     * @param lineData
-     */
-    public void delete(LineData lineData) {
-        lineData.put(insert_key, "delete");
+    public void putLineData(LineData lineData){
         data_array.add(lineData.toJSONString());
     }
 

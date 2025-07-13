@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 
 public class LineData {
     private JSONObject jsonObject;
-
+    private String insert_key = "_crud_type";
     @Override
     public String toString() {
         return "LineData{" + jsonObject + '}';
@@ -43,6 +43,14 @@ public class LineData {
     public Boolean getBoolean(String column){
         String value = jsonObject.get(column).toString();
         return Boolean.valueOf(value);
+    }
+
+    public void insert(){
+        jsonObject.put(insert_key, "insert");
+    }
+
+    public void delete(){
+        jsonObject.put(insert_key, "delete");
     }
 
     public String toJSONString(){

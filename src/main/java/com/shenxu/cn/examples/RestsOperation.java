@@ -2,6 +2,8 @@ package com.shenxu.cn.examples;
 
 import com.shenxu.cn.client.DataLakeClient;
 
+import java.util.Map;
+
 
 public class RestsOperation {
     public static void main(String[] args) {
@@ -11,7 +13,8 @@ public class RestsOperation {
         try {
             DataLakeClient dataLakeClient = new DataLakeClient(dataLakeIp, dataLakePort);
             // 获得table_name最大的offset
-            dataLakeClient.getMaxOffset("table_name");
+            Map<Integer, Long> map = dataLakeClient.getMaxOffset("table_name");
+            System.out.println("map = "+map);
             // 删除table_name的 column 字段
             dataLakeClient.alterTableDelete("table_name","column");
             // 向table_name 添加 column 字段，如果column字段为null 默认值为 test

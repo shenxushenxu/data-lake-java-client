@@ -1,9 +1,12 @@
 package com.shenxu.cn.client;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import com.shenxu.cn.deserializer.DataLakeStreamDataDeserializer;
 import com.shenxu.cn.entity.DataLakeStreamData;
-import com.shenxu.cn.entity.LineData;
+
 import org.xerial.snappy.Snappy;
 
 import java.io.DataInputStream;
@@ -17,10 +20,11 @@ public class DataLakeStreamClient {
     private Socket socket;
     private DataOutputStream out;
     private DataInputStream in;
-    private JSONArray PartitionCodeAndOffSet;
+    private List<Map<String, Long>> PartitionCodeAndOffSet;
     private String TableName;
     public Map<Integer, Long> offsetSave;
 
+    private Gson gson;
     private int readCount;
 
     public DataLakeStreamClient(String serverAddress, int serverPort) throws IOException {
@@ -28,8 +32,14 @@ public class DataLakeStreamClient {
         out = new DataOutputStream(socket.getOutputStream());
         in = new DataInputStream(socket.getInputStream());
 
-        this.PartitionCodeAndOffSet = new JSONArray();
+        this.PartitionCodeAndOffSet = new ArrayList();
         this.offsetSave = new HashMap<Integer, Long>();
+
+        this.gson = new GsonBuilder()
+                .registerTypeAdapter(DataLakeStreamData.class, new DataLakeStreamDataDeserializer())
+                .create();
+
+
     }
 
 
@@ -53,7 +63,7 @@ public class DataLakeStreamClient {
             long offset = offsetSave.get(partitioncode);
 
 
-            JSONObject jsonObject = new JSONObject();
+            Map<String, Long> jsonObject = new HashMap<>();
             jsonObject.put("patition_code", Long.valueOf(partitioncode));
             jsonObject.put("offset", offset + 1);
             PartitionCodeAndOffSet.add(jsonObject);
@@ -82,24 +92,24 @@ public class DataLakeStreamClient {
 
         // 获取输入输出流
 
-        JSONObject stream_read = new JSONObject();
+        Map<String, Object> stream_read = new HashMap<>();
         stream_read.put("table_name", TableName);
         stream_read.put("read_count", readCount);
         stream_read.put("patition_mess", PartitionCodeAndOffSet);
 
-        JSONObject jsonObject = new JSONObject();
+        Map<String, Map<String, Object>> jsonObject = new HashMap<>();
         jsonObject.put("stream_read", stream_read);
-        String ccc = jsonObject.toJSONString();
 
-        System.out.println(ccc);
-        byte[] bytes = ccc.getBytes();
+        String dataLakeMessage = new Gson().toJson(jsonObject);
+
+        byte[] bytes = dataLakeMessage.getBytes();
 
         int bytes_len = bytes.length;
 
         out.writeInt(bytes_len);
         out.write(bytes);
 
-        List<DataLakeStreamData> dataLakeStreamDataList = new ArrayList<DataLakeStreamData>();
+        List<DataLakeStreamData> resList = new ArrayList<DataLakeStreamData>();
 
         while (true) {
             int mess_len = in.readInt();
@@ -115,30 +125,15 @@ public class DataLakeStreamClient {
 
             } else {
                 byte[] mess = new byte[mess_len];
-
-
                 in.readFully(mess);
-
-
                 byte[] uncompressedData = Snappy.uncompress(mess);
-
-
-                JSONArray res_json = JSONArray.parseArray(new String(uncompressedData));
-
-
-                for (int i = 0; i< res_json.size();i++){
-                    JSONObject eachData = res_json.getJSONObject(i);
-                    DataLakeStreamData dataLakeStreamData = DataLakeStreamData.parseDataLakeStreamData(eachData);
-                    dataLakeStreamDataList.add(dataLakeStreamData);
-
-                    long offset = dataLakeStreamData.getOffset();
-                    int patition_code = dataLakeStreamData.getPartitionCode();
-                    offsetSave.put(patition_code, offset);
-                }
+                List<DataLakeStreamData> dataLakeStreamDataList = gson.fromJson(new String(uncompressedData), new TypeToken<List<DataLakeStreamData>>() {
+                }.getType());
+                resList.addAll(dataLakeStreamDataList);
             }
         }
 
-        return dataLakeStreamDataList;
+        return resList;
     }
 
     public void close() throws IOException {

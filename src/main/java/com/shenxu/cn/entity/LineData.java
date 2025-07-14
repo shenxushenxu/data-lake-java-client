@@ -1,66 +1,75 @@
 package com.shenxu.cn.entity;
 
-import com.alibaba.fastjson.JSONObject;
+
+import com.google.gson.Gson;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class LineData {
-    private JSONObject jsonObject;
+    private Map<String, Object> fields;
+
+
     private String insert_key = "_crud_type";
+
     @Override
     public String toString() {
-        return "LineData{" + jsonObject + '}';
+        return "LineData{" + fields + '}';
     }
 
     public LineData(){
-        jsonObject = new JSONObject();
+        fields = new HashMap<String, Object>();
     }
 
     public void put(String column, Object value){
-        jsonObject.put(column, value);
+        fields.put(column, value);
     }
 
     public Object get(String column){
-        return jsonObject.get(column);
+        return fields.get(column);
     }
 
     public String getString(String column){
-        return jsonObject.get(column).toString();
+        return fields.get(column).toString();
     }
 
     public Long getLong(String column){
-        String value = jsonObject.get(column).toString();
+        String value = fields.get(column).toString();
         return Long.valueOf(value);
     }
 
     public Integer getInt(String column){
-        String value = jsonObject.get(column).toString();
+        String value = fields.get(column).toString();
         return Integer.valueOf(value);
     }
     public Float getFloat(String column){
-        String value = jsonObject.get(column).toString();
+        String value = fields.get(column).toString();
         return Float.valueOf(value);
     }
 
     public Boolean getBoolean(String column){
-        String value = jsonObject.get(column).toString();
+        String value = fields.get(column).toString();
         return Boolean.valueOf(value);
     }
 
     public void insert(){
-        jsonObject.put(insert_key, "insert");
+        fields.put(insert_key, "insert");
     }
 
     public void delete(){
-        jsonObject.put(insert_key, "delete");
+        fields.put(insert_key, "delete");
     }
 
     public String toJSONString(){
-        return jsonObject.toJSONString();
+        Gson gson = new Gson();
+
+        return gson.toJson(gson);
     }
-    public JSONObject getJsonObject(){
-        return jsonObject;
+    public Map<String, Object> getMap(){
+        return fields;
     }
-    public void setJsonObject(JSONObject jsonObject){
-        this.jsonObject = jsonObject;
+    public void setMap(Map<String, Object> jsonObject){
+        this.fields = jsonObject;
     }
 
 

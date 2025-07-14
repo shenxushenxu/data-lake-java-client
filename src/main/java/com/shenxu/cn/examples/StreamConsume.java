@@ -13,11 +13,16 @@ public class StreamConsume {
         dataLakeStreamClient.setReadCount(1000);
         dataLakeStreamClient.setTableName("table_name");
 
+        // 如果你自己保存了offset 可以设置从 某个offset开始消费，有几个分区调用几次
+//        dataLakeStreamClient.setPartitionCodeAndOffSet(0,100);
+//        dataLakeStreamClient.setPartitionCodeAndOffSet(1,101);
+//        dataLakeStreamClient.setPartitionCodeAndOffSet(2,100);
+//        dataLakeStreamClient.setPartitionCodeAndOffSet(3,105);
+
         while (true){
             List<DataLakeStreamData> list = dataLakeStreamClient.load();
 
             for (DataLakeStreamData dataLakeData : list){
-
 
                 System.out.println(dataLakeData);
             }

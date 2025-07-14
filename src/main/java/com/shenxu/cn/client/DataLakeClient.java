@@ -1,17 +1,19 @@
 package com.shenxu.cn.client;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.shenxu.cn.entity.LineData;
-import org.xerial.snappy.Snappy;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.shenxu.cn.entity.LineData;
+import com.shenxu.cn.entity.TableStructure;
+import org.xerial.snappy.Snappy;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.rmi.server.ExportException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class DataLakeClient {
@@ -20,13 +22,13 @@ public class DataLakeClient {
     private DataOutputStream out;
     private DataInputStream in;
     //    private String tableName;
-    private JSONArray data_array;
+    private List data_array;
 
 
 
     public DataLakeClient(String DataLakeIp, int DataLakePort) throws IOException {
 
-        data_array = new JSONArray();
+        data_array = new ArrayList();
         socket = new Socket(DataLakeIp, DataLakePort);
         out = new DataOutputStream(socket.getOutputStream());
         in = new DataInputStream(socket.getInputStream());
@@ -57,24 +59,23 @@ public class DataLakeClient {
             throw new Exception("tableName 为 null");
         }
 
-        byte[] data_byte = Snappy.compress(data_array.toJSONString());
+        byte[] data_byte = Snappy.compress(new Gson().toJson(data_array));
         List<Integer> unsignedList = new ArrayList<>();
         for (byte b : data_byte) {
             unsignedList.add(b & 0xFF); // 转换为 0-255
         }
 
-        JSONObject data = new JSONObject();
+        Map<String, Object> data = new HashMap<String, Object>();
         data.put("data", unsignedList);
         data.put("table_name", tableName);
         data.put("partition_code", partitionCode);
 
 
-        JSONObject batch_insert = new JSONObject();
+        Map<String, Object> batch_insert = new HashMap<String, Object>();
         batch_insert.put("batch_insert", data);
         data_array.clear();
 
-
-        saveData(batch_insert.toJSONString());
+        saveData(new Gson().toJson(batch_insert));
 
     }
 
@@ -93,21 +94,21 @@ public class DataLakeClient {
             throw new Exception("tableName 为 null");
         }
 
-        byte[] data_byte = Snappy.compress(data_array.toJSONString());
+        byte[] data_byte = Snappy.compress(new Gson().toJson(data_array));
         List<Integer> unsignedList = new ArrayList<>();
         for (byte b : data_byte) {
             unsignedList.add(b & 0xFF); // 转换为 0-255
         }
-        JSONObject data = new JSONObject();
+        Map<String, Object> data = new HashMap<String, Object>();
         data.put("data", unsignedList);
         data.put("table_name", tableName);
 
-        JSONObject batch_insert = new JSONObject();
+        Map<String, Object> batch_insert = new HashMap<String, Object>();
         batch_insert.put("batch_insert", data);
         data_array.clear();
 
 
-        saveData(batch_insert.toJSONString());
+        saveData(new Gson().toJson(batch_insert));
 
     }
 
@@ -119,11 +120,11 @@ public class DataLakeClient {
      * @return
      * @throws Exception
      */
-    public JSONObject getTableStructure(String tableName) throws Exception {
+    public TableStructure getTableStructure(String tableName) throws Exception {
 
-        JSONObject jsonObject = new JSONObject();
+        Map<String, String> jsonObject = new HashMap<>();
         jsonObject.put("sql", "show " + tableName);
-        String data = jsonObject.toJSONString();
+        String data = new Gson().toJson(jsonObject);
         out.write(data.getBytes());
         out.flush();
         int is = in.readInt();
@@ -137,7 +138,7 @@ public class DataLakeClient {
             byte[] mess = new byte[len];
             in.readFully(mess);
             String tableStructure = new String(mess);
-            return JSONObject.parseObject(tableStructure);
+            return new TableStructure(tableStructure);
         }
 
     }
@@ -146,9 +147,9 @@ public class DataLakeClient {
      * 删除表
      */
     public int dropTable(String tableName) throws Exception {
-        JSONObject jsonObject = new JSONObject();
+        Map<String, String> jsonObject = new HashMap<>();
         jsonObject.put("sql", "drop " + tableName);
-        String data = jsonObject.toJSONString();
+        String data = new Gson().toJson(jsonObject);
         out.write(data.getBytes());
         out.flush();
         int is = in.readInt();
@@ -171,13 +172,13 @@ public class DataLakeClient {
                              String type,
                              String defaultValue) throws Exception {
 
-        JSONObject jsonObject = new JSONObject();
+        Map<String,String> jsonObject = new HashMap<>();
         jsonObject.put("sql", "ALTER TABLE "
                 + tableName + " ADD "
                 + column + " "
                 + type + " "
                 + "DEFAULT " + defaultValue);
-        String data = jsonObject.toJSONString();
+        String data = new Gson().toJson(jsonObject);
         out.write(data.getBytes());
         out.flush();
         int is = in.readInt();
@@ -199,9 +200,9 @@ public class DataLakeClient {
                              String type
     ) throws Exception {
 
-        JSONObject jsonObject = new JSONObject();
+        Map<String, String> jsonObject = new HashMap<>();
         jsonObject.put("sql", "ALTER TABLE " + tableName + " ADD " + column + " " + type);
-        String data = jsonObject.toJSONString();
+        String data = new Gson().toJson(jsonObject);
         out.write(data.getBytes());
         out.flush();
         int is = in.readInt();
@@ -222,9 +223,9 @@ public class DataLakeClient {
                                 String column
     ) throws Exception {
 
-        JSONObject jsonObject = new JSONObject();
+        Map<String, String> jsonObject = new HashMap<>();
         jsonObject.put("sql", "ALTER TABLE "+tableName+" OROP "+column);
-        String data = jsonObject.toJSONString();
+        String data = new Gson().toJson(jsonObject);
         out.write(data.getBytes());
         out.flush();
         int is = in.readInt();
@@ -242,11 +243,11 @@ public class DataLakeClient {
     /**
      * 获得表内每个分区最大的offset
      */
-    public JSONObject getMaxOffset(String tableName) throws Exception {
+    public Map<Integer, Long> getMaxOffset(String tableName) throws Exception {
 
-        JSONObject jsonObject = new JSONObject();
+        Map<String, String> jsonObject = new HashMap<>();
         jsonObject.put("sql", "MAX_OFFSET "+tableName);
-        String data = jsonObject.toJSONString();
+        String data = new Gson().toJson(jsonObject);
         out.write(data.getBytes());
         out.flush();
         int is = in.readInt();
@@ -260,7 +261,10 @@ public class DataLakeClient {
             byte[] mess = new byte[len];
             in.readFully(mess);
             String offsets = new String(mess);
-            return JSONObject.parseObject(offsets);
+            Map<Integer, Long> jsonMap = new Gson().fromJson(offsets, new TypeToken<Map<Integer, Long>>() { }.getType());
+
+
+            return jsonMap;
         }
     }
 
@@ -270,10 +274,10 @@ public class DataLakeClient {
      * @throws Exception
      */
     public void compress(String tableName) throws Exception {
-        JSONObject jsonObject = new JSONObject();
+        Map<String, String > jsonObject = new HashMap<>();
         jsonObject.put("compress_table", tableName);
 
-        saveData(jsonObject.toJSONString());
+        saveData(new Gson().toJson(jsonObject));
     }
 
     /**

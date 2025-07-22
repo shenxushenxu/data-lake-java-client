@@ -2,8 +2,10 @@ package com.shenxu.cn.entity;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 
-public class DataLakeStreamData {
+
+public class DataLakeStreamData implements Serializable {
     @SerializedName("table_name")
     private String tableName;
 

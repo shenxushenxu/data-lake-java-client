@@ -12,10 +12,11 @@ import org.xerial.snappy.Snappy;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.Socket;
 import java.util.*;
 
-public class DataLakeStreamClient {
+public class DataLakeStreamClient implements Serializable {
 
     private Socket socket;
     private DataOutputStream out;

@@ -2,7 +2,9 @@ package com.shenxu.cn.entity;
 
 import com.google.gson.annotations.SerializedName;
 
-public class ColumnConfig {
+import java.io.Serializable;
+
+public class ColumnConfig implements Serializable {
     private String datatype;
     @SerializedName("column_config")
     private String columnConfig;

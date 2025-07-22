@@ -22,11 +22,6 @@
             <version>1.1.10.7</version>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>com.fasterxml.jackson.core</groupId>-->
-<!--            <artifactId>jackson-databind</artifactId>-->
-<!--            <version>2.19.1</version>-->
-<!--        </dependency>-->
 
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -38,6 +33,9 @@
     </dependencies>
 
 <!--    <build>-->
+
+
+
 <!--        <plugins>-->
 <!--            &lt;!&ndash; We use the maven-shade plugin to create a fat jar that contains all necessary dependencies. &ndash;&gt;-->
 <!--            &lt;!&ndash; Change the value of <mainClass>...</mainClass> if your program entry point changes. &ndash;&gt;-->
@@ -176,6 +174,13 @@
 <!--                    </execution>-->
 <!--                </executions>-->
 <!--            </plugin>-->
+
+
+
+
+
+
+
 <!--        </plugins>-->
 <!--    </build>-->
 

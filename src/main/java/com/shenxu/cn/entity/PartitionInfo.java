@@ -1,6 +1,8 @@
 package com.shenxu.cn.entity;
 
-public class PartitionInfo {
+import java.io.Serializable;
+
+public class PartitionInfo implements Serializable {
 
     private String address;
     private String info;

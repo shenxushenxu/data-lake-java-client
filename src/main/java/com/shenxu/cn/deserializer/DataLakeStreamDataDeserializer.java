@@ -23,7 +23,7 @@ public class DataLakeStreamDataDeserializer implements JsonDeserializer<DataLake
             long offset = obj.get("offset").getAsLong();
             JsonObject jsonObject  = obj.get("data").getAsJsonObject();
 
-            Map<String, Object> map = new HashMap<>();
+            Map<String, String> map = new HashMap<>();
             for (String key : jsonObject.keySet()){
                 String value = jsonObject.get(key).getAsString();
                 map.put(key, value);

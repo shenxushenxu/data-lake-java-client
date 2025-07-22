@@ -1,6 +1,8 @@
 package com.shenxu.cn.entity;
 
-public class ColumnDefinition {
+import java.io.Serializable;
+
+public class ColumnDefinition implements Serializable {
     private String columnName;
     private ColumnConfig config;
 

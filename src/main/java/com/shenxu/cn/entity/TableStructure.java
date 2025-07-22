@@ -4,12 +4,13 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class TableStructure {
+public class TableStructure implements Serializable {
 
 
     private Map<String, List<PartitionInfo>> partitionAddress;

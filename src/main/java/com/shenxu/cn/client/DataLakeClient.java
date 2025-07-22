@@ -3,32 +3,33 @@ package com.shenxu.cn.client;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.shenxu.cn.entity.BatchData;
 import com.shenxu.cn.entity.LineData;
 import com.shenxu.cn.entity.TableStructure;
 import org.xerial.snappy.Snappy;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
-public class DataLakeClient {
+public class DataLakeClient implements Serializable {
 
     private Socket socket;
     private DataOutputStream out;
     private DataInputStream in;
     //    private String tableName;
-    private List data_array;
+    private BatchData batchData;
 
+    public int getDataArrayLength(){
+        return batchData.getSize();
+    }
 
 
     public DataLakeClient(String DataLakeIp, int DataLakePort) throws IOException {
-
-        data_array = new ArrayList();
+        batchData = new BatchData();
         socket = new Socket(DataLakeIp, DataLakePort);
         out = new DataOutputStream(socket.getOutputStream());
         in = new DataInputStream(socket.getInputStream());
@@ -40,7 +41,8 @@ public class DataLakeClient {
      * @param lineData
      */
     public void putLineData(LineData lineData){
-        data_array.add(lineData.toJSONString());
+
+        batchData.putLineData(lineData);
     }
 
     /**
@@ -50,32 +52,33 @@ public class DataLakeClient {
      * @param partitionCode 指定插入的分区号
      * @throws Exception
      */
-    public void execute(String tableName, String partitionCode) throws Exception {
+    public void execute(String tableName, int partitionCode) throws Exception {
 
-        if (data_array.size() == 0) {
-            throw new Exception("data_array内无数据可插入");
+        if (batchData.getSize() == 0) {
+//            throw new Exception("data_array内无数据可插入");
+            return;
         }
         if (tableName == null || "".equals(tableName)) {
             throw new Exception("tableName 为 null");
         }
 
-        byte[] data_byte = Snappy.compress(new Gson().toJson(data_array));
-        List<Integer> unsignedList = new ArrayList<>();
-        for (byte b : data_byte) {
-            unsignedList.add(b & 0xFF); // 转换为 0-255
+        batchData.setTableName(tableName);
+        batchData.setPartitionCode(partitionCode);
+
+        byte[] dataArrayString = batchData.serializeToBincode();
+
+        byte[] data_byte = Snappy.compress(dataArrayString);
+
+        int dataByteLen = data_byte.length;
+        byte[] unsignedList = new byte[dataByteLen];
+
+        for (int i =0;i<dataByteLen;i++) {
+            unsignedList[i] = (byte) (data_byte[i] & 0xFF);
         }
+        batchData.clear();
 
-        Map<String, Object> data = new HashMap<String, Object>();
-        data.put("data", unsignedList);
-        data.put("table_name", tableName);
-        data.put("partition_code", partitionCode);
+        saveData(unsignedList);
 
-
-        Map<String, Object> batch_insert = new HashMap<String, Object>();
-        batch_insert.put("batch_insert", data);
-        data_array.clear();
-
-        saveData(new Gson().toJson(batch_insert));
 
     }
 
@@ -87,30 +90,35 @@ public class DataLakeClient {
      */
     public void execute(String tableName) throws Exception {
 
-        if (data_array.size() == 0) {
+        if (batchData.getSize() == 0) {
             throw new Exception("data_array内无数据可插入");
         }
         if (tableName == null || "".equals(tableName)) {
             throw new Exception("tableName 为 null");
         }
 
-        byte[] data_byte = Snappy.compress(new Gson().toJson(data_array));
-        List<Integer> unsignedList = new ArrayList<>();
-        for (byte b : data_byte) {
-            unsignedList.add(b & 0xFF); // 转换为 0-255
+        batchData.setTableName(tableName);
+
+
+        byte[] dataArrayString = batchData.serializeToBincode();
+        byte[] data_byte = Snappy.compress(dataArrayString);
+        int dataByteLen = data_byte.length;
+        byte[] unsignedList = new byte[dataByteLen];
+
+        for (int i =0;i<dataByteLen;i++) {
+            unsignedList[i] = (byte) (data_byte[i] & 0xFF);
         }
-        Map<String, Object> data = new HashMap<String, Object>();
-        data.put("data", unsignedList);
-        data.put("table_name", tableName);
 
-        Map<String, Object> batch_insert = new HashMap<String, Object>();
-        batch_insert.put("batch_insert", data);
-        data_array.clear();
-
-
-        saveData(new Gson().toJson(batch_insert));
+        saveData(unsignedList);
 
     }
+
+
+
+
+
+
+
 
 
     /**
@@ -123,7 +131,7 @@ public class DataLakeClient {
     public TableStructure getTableStructure(String tableName) throws Exception {
 
         Map<String, String> jsonObject = new HashMap<>();
-        jsonObject.put("sql", "show " + tableName);
+        jsonObject.put("sql", "desc " + tableName);
         String data = new Gson().toJson(jsonObject);
         out.write(data.getBytes());
         out.flush();
@@ -276,8 +284,17 @@ public class DataLakeClient {
     public void compress(String tableName) throws Exception {
         Map<String, String > jsonObject = new HashMap<>();
         jsonObject.put("compress_table", tableName);
-
-        saveData(new Gson().toJson(jsonObject));
+        byte[] data = new Gson().toJson(jsonObject).getBytes();
+        out.writeInt(data.length);
+        out.write(data);
+        out.flush();
+        int is = in.readInt();
+        if (is == -2) {
+            int len = in.readInt();
+            byte[] mess = new byte[len];
+            in.readFully(mess);
+            throw new Exception(new String(mess));
+        }
     }
 
     /**
@@ -286,11 +303,12 @@ public class DataLakeClient {
      * @param data
      * @throws Exception
      */
-    private void saveData(String data) throws Exception {
-        byte[] bytesData = data.getBytes();
-
-        out.writeInt(bytesData.length);
-        out.write(bytesData);
+    private void saveData(byte[] data) throws Exception {
+        byte[] bi = "\"batch_insert\"".getBytes();
+        out.writeInt(bi.length);
+        out.write(bi);
+        out.writeInt(data.length);
+        out.write(data);
         out.flush();
 
         int is = in.readInt();

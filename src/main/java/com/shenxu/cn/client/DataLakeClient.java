@@ -12,6 +12,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.Socket;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 
@@ -99,7 +101,7 @@ public class DataLakeClient implements Serializable {
 
         batchData.setTableName(tableName);
 
-
+        long start_time = new Date().getTime();
         byte[] dataArrayString = batchData.serializeToBincode();
         byte[] data_byte = Snappy.compress(dataArrayString);
         int dataByteLen = data_byte.length;
@@ -109,8 +111,15 @@ public class DataLakeClient implements Serializable {
             unsignedList[i] = (byte) (data_byte[i] & 0xFF);
         }
 
-        saveData(unsignedList);
 
+        long end_time = new Date().getTime();
+        System.out.println("+++++++++++++++++++++   "+(end_time - start_time));
+
+        System.out.println("传输的总数据量："+dataArrayString.length +"   压缩后的数据量为："+unsignedList.length);
+        long savedata_start_time = new Date().getTime();
+        saveData(unsignedList);
+        long savedata_end_time = new Date().getTime();
+        System.out.println("--------------------------   "+(savedata_end_time - savedata_start_time));
     }
 
 
@@ -307,9 +316,17 @@ public class DataLakeClient implements Serializable {
         byte[] bi = "\"batch_insert\"".getBytes();
         out.writeInt(bi.length);
         out.write(bi);
+        System.out.println("发送了  batch_insert");
+
         out.writeInt(data.length);
+        System.out.println("1111111111111111");
         out.write(data);
+        System.out.println("发送了数据");
         out.flush();
+
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+        System.out.println("客户端发送数据完成的时间：    "+now.format(formatter));
 
         int is = in.readInt();
 

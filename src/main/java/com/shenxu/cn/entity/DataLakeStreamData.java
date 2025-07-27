@@ -5,20 +5,15 @@ import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 
 
-public class DataLakeStreamData implements Serializable {
-    @SerializedName("table_name")
+public class DataLakeStreamData {
     private String tableName;
 
-    @SerializedName("major_value")
     private String majorValue;
 
-    @SerializedName("_crud_type")
     private String crudType;
 
-    @SerializedName("partition_code")
     private int partitionCode;
 
-    @SerializedName("offset")
     private long offset;
 
 //    @SerializedName("data")

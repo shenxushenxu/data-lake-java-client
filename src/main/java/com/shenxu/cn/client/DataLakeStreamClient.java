@@ -2,13 +2,10 @@ package com.shenxu.cn.client;
 
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
-import com.shenxu.cn.deserializer.DataLakeStreamDataDeserializer;
+import com.shenxu.cn.bincode.BinCodeDeserialize;
 import com.shenxu.cn.entity.DataLakeStreamData;
-
+import com.shenxu.cn.entity.LineData;
 import org.xerial.snappy.Snappy;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -24,8 +21,6 @@ public class DataLakeStreamClient implements Serializable {
     private List<Map<String, Long>> PartitionCodeAndOffSet;
     private String TableName;
     public Map<Integer, Long> offsetSave;
-
-    private Gson gson;
     private int readCount;
 
     public DataLakeStreamClient(String serverAddress, int serverPort) throws IOException {
@@ -35,12 +30,6 @@ public class DataLakeStreamClient implements Serializable {
 
         this.PartitionCodeAndOffSet = new ArrayList();
         this.offsetSave = new HashMap<Integer, Long>();
-
-        this.gson = new GsonBuilder()
-                .registerTypeAdapter(DataLakeStreamData.class, new DataLakeStreamDataDeserializer())
-                .create();
-
-
     }
 
 
@@ -128,14 +117,55 @@ public class DataLakeStreamClient implements Serializable {
                 byte[] mess = new byte[mess_len];
                 in.readFully(mess);
                 byte[] uncompressedData = Snappy.uncompress(mess);
-                List<DataLakeStreamData> dataLakeStreamDataList = gson.fromJson(new String(uncompressedData), new TypeToken<List<DataLakeStreamData>>() {
-                }.getType());
+
+                List<DataLakeStreamData> dataLakeStreamDataList = this.deserialize(uncompressedData);
+
                 resList.addAll(dataLakeStreamDataList);
             }
         }
 
         return resList;
     }
+
+
+    private List<DataLakeStreamData> deserialize(byte[] bytes){
+        BinCodeDeserialize binCodeDeserialize = new BinCodeDeserialize(bytes);
+
+        long listSize = binCodeDeserialize.getLong();
+        List<DataLakeStreamData> result = new ArrayList<>((int) listSize);
+
+        for (int i = 0; i < listSize; i++) {
+            result.add(parseDataLakeStreamData(binCodeDeserialize));
+        }
+
+        return result;
+    }
+
+    private static DataLakeStreamData parseDataLakeStreamData(BinCodeDeserialize binCodeDeserialize) {
+        // 按字段顺序解析
+        String tableName = binCodeDeserialize.getString();
+        String majorValue = binCodeDeserialize.getString();
+        Map<String, String> dataMap = binCodeDeserialize.getHashMap();
+        String crudType = binCodeDeserialize.getString();
+        String partitionCode = binCodeDeserialize.getString();
+        long offset = binCodeDeserialize.getLong(); // i64
+
+        LineData lineData = new LineData();
+        lineData.setMap(dataMap);
+
+
+        return new DataLakeStreamData(
+                tableName,
+                majorValue,
+                crudType,
+                Integer.valueOf(partitionCode),
+                offset,
+                lineData
+        );
+    }
+
+
+
 
     public void close() throws IOException {
         socket.close();

@@ -110,6 +110,7 @@ public class DataLakeClient implements Serializable {
         for (int i =0;i<dataByteLen;i++) {
             unsignedList[i] = (byte) (data_byte[i] & 0xFF);
         }
+        batchData.clear();
 
 
         long end_time = new Date().getTime();

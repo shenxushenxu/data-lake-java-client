@@ -1,4 +1,4 @@
-package com.shenxu.cn.entity;
+package com.datalake.cn.entity;
 
 
 import com.google.gson.Gson;
@@ -7,19 +7,24 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+
+
+
+
 public class LineData implements Serializable {
-    private Map<String, String> fields;
 
 
-    private String insert_key = "_crud_type";
+    private Map<String, Object> fields;
+
 
     @Override
     public String toString() {
-        return "LineData{" + fields + '}';
+        Gson gson = new Gson();
+        return gson.toJson(fields);
     }
 
     public LineData(){
-        fields = new HashMap<String, String>();
+        fields = new HashMap<String, Object>();
     }
 
     public void put(String column, Object value){
@@ -54,23 +59,26 @@ public class LineData implements Serializable {
     }
 
     public void insert(){
-        fields.put(insert_key, "insert");
+        fields.put(SignClass.INSERT_KEY, "insert");
     }
 
     public void delete(){
-        fields.put(insert_key, "delete");
+        fields.put(SignClass.INSERT_KEY, "delete");
     }
 
     public String toJSONString(){
         Gson gson = new Gson();
-
         return gson.toJson(fields);
     }
-    public Map<String, String> getMap(){
+    public Map<String, Object> getMap(){
         return fields;
     }
-    public void setMap(Map<String, String> jsonObject){
+    public void setMap(Map<String, Object> jsonObject){
         this.fields = jsonObject;
+    }
+
+    public int getSize(){
+        return this.fields.size();
     }
 
 

@@ -1,4 +1,4 @@
-package com.shenxu.cn.entity;
+package com.datalake.cn.entity;
 
 import com.google.gson.annotations.SerializedName;
 

@@ -1,4 +1,4 @@
-package com.shenxu.cn.bincode;
+package com.datalake.cn.bincode;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -14,10 +14,10 @@ public class BinCodeDeserialize {
         buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN);
     }
 
-    public Map<String, String> getHashMap() {
+    public Map<String, Object> getHashMap() {
         // 读取 HashMap 大小 (u64)
         long mapSize = buffer.getLong();
-        Map<String, String> map = new HashMap<>((int) mapSize);
+        Map<String, Object> map = new HashMap<>((int) mapSize);
 
         for (int i = 0; i < mapSize; i++) {
             String key = this.getString();

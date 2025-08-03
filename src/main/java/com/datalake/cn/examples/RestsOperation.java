@@ -1,6 +1,6 @@
-package com.shenxu.cn.examples;
+package com.datalake.cn.examples;
 
-import com.shenxu.cn.client.DataLakeClient;
+import com.datalake.cn.client.DataLakeClient;
 
 import java.util.Map;
 
@@ -11,22 +11,22 @@ public class RestsOperation {
         int dataLakePort = 7853;
 
         try {
-            DataLakeClient dataLakeClient = new DataLakeClient(dataLakeIp, dataLakePort);
+            DataLakeClient dataLakeClient = new DataLakeClient(dataLakeIp, dataLakePort,"table_name");
             // 获得table_name最大的offset
-            Map<Integer, Long> map = dataLakeClient.getMaxOffset("table_name");
+            Map<Integer, Long> map = dataLakeClient.getMaxOffset();
             System.out.println("map = "+map);
             // 删除table_name的 column 字段
-            dataLakeClient.alterTableDelete("table_name","column");
+            dataLakeClient.alterTableDelete("column");
             // 向table_name 添加 column 字段，如果column字段为null 默认值为 test
-            dataLakeClient.alterTableAdd("table_name", "column", "string", "test");
+            dataLakeClient.alterTableAdd("column", "string", "test");
             // 向table_name 添加 column 字段
-            dataLakeClient.alterTableAdd("table_name", "column", "string");
+            dataLakeClient.alterTableAdd("column", "string");
             // 获得 table_name 的表结构 （字段名，字段类型，分区个数，主键名称，各各分区的状态）
-            dataLakeClient.getTableStructure("table_name");
+            dataLakeClient.getTableStructure();
             // 删除table_name表
-            dataLakeClient.dropTable("table_name");
+            dataLakeClient.dropTable();
             // 压缩table_name 表的数据
-            dataLakeClient.compress("table_name");
+            dataLakeClient.compress();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

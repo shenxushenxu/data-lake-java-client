@@ -1,8 +1,4 @@
-package com.shenxu.cn.entity;
-
-import com.google.gson.annotations.SerializedName;
-
-import java.io.Serializable;
+package com.datalake.cn.entity;
 
 
 public class DataLakeStreamData {
@@ -27,7 +23,7 @@ public class DataLakeStreamData {
                 ", crudType=" + crudType +
                 ", partitionCode=" + partitionCode +
                 ", offset=" + offset +
-                ", data=" + data +
+                ", data=LineData" + data +
                 '}';
     }
 

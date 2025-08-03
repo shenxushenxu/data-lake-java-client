@@ -1,19 +1,17 @@
-package com.shenxu.cn.client;
+package com.datalake.cn.client;
 
 
+import com.datalake.cn.entity.BatchData;
+import com.datalake.cn.entity.LineData;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.shenxu.cn.entity.BatchData;
-import com.shenxu.cn.entity.LineData;
-import com.shenxu.cn.entity.TableStructure;
+import com.datalake.cn.entity.TableStructure;
 import org.xerial.snappy.Snappy;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.Socket;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 
@@ -25,16 +23,28 @@ public class DataLakeClient implements Serializable {
     //    private String tableName;
     private BatchData batchData;
 
+    private String tableName;
+
     public int getDataArrayLength(){
         return batchData.getSize();
     }
 
+    public DataLakeClient(String DataLakeIp, int DataLakePort, String tableName) throws Exception {
 
-    public DataLakeClient(String DataLakeIp, int DataLakePort) throws IOException {
-        batchData = new BatchData();
         socket = new Socket(DataLakeIp, DataLakePort);
         out = new DataOutputStream(socket.getOutputStream());
         in = new DataInputStream(socket.getInputStream());
+        this.tableName = tableName;
+    }
+
+    public DataLakeClient(String DataLakeIp, int DataLakePort, String tableName, List<String> insertColumName) throws Exception {
+        batchData = new BatchData(insertColumName);
+        batchData.setTableName(tableName);
+
+        socket = new Socket(DataLakeIp, DataLakePort);
+        out = new DataOutputStream(socket.getOutputStream());
+        in = new DataInputStream(socket.getInputStream());
+        this.tableName = tableName;
     }
 
 
@@ -42,85 +52,40 @@ public class DataLakeClient implements Serializable {
      * 将 line 放置到 批中
      * @param lineData
      */
-    public void putLineData(LineData lineData){
+    public void putLineData(LineData lineData) throws Exception {
 
         batchData.putLineData(lineData);
     }
 
+
     /**
      * 执行插入的方法
      *
-     * @param tableName     指定插入的表名
-     * @param partitionCode 指定插入的分区号
      * @throws Exception
      */
-    public void execute(String tableName, int partitionCode) throws Exception {
+    public void execute() throws Exception {
 
         if (batchData.getSize() == 0) {
-//            throw new Exception("data_array内无数据可插入");
             return;
         }
         if (tableName == null || "".equals(tableName)) {
             throw new Exception("tableName 为 null");
         }
-
-        batchData.setTableName(tableName);
-        batchData.setPartitionCode(partitionCode);
-
-        byte[] dataArrayString = batchData.serializeToBincode();
-
-        byte[] data_byte = Snappy.compress(dataArrayString);
-
-        int dataByteLen = data_byte.length;
-        byte[] unsignedList = new byte[dataByteLen];
-
-        for (int i =0;i<dataByteLen;i++) {
-            unsignedList[i] = (byte) (data_byte[i] & 0xFF);
-        }
-        batchData.clear();
-
-        saveData(unsignedList);
-
-
-    }
-
-    /**
-     * 执行插入的方法
-     *
-     * @param tableName 指定插入的表名
-     * @throws Exception
-     */
-    public void execute(String tableName) throws Exception {
-
-        if (batchData.getSize() == 0) {
-            throw new Exception("data_array内无数据可插入");
-        }
-        if (tableName == null || "".equals(tableName)) {
-            throw new Exception("tableName 为 null");
-        }
-
-        batchData.setTableName(tableName);
-
         long start_time = new Date().getTime();
         byte[] dataArrayString = batchData.serializeToBincode();
-        byte[] data_byte = Snappy.compress(dataArrayString);
-        int dataByteLen = data_byte.length;
-        byte[] unsignedList = new byte[dataByteLen];
-
-        for (int i =0;i<dataByteLen;i++) {
-            unsignedList[i] = (byte) (data_byte[i] & 0xFF);
-        }
-        batchData.clear();
-
-
         long end_time = new Date().getTime();
-        System.out.println("+++++++++++++++++++++   "+(end_time - start_time));
 
-        System.out.println("传输的总数据量："+dataArrayString.length +"   压缩后的数据量为："+unsignedList.length);
-        long savedata_start_time = new Date().getTime();
-        saveData(unsignedList);
-        long savedata_end_time = new Date().getTime();
-        System.out.println("--------------------------   "+(savedata_end_time - savedata_start_time));
+        System.out.println("序列化时间:   "+(end_time - start_time));
+
+
+        byte[] data_byte = Snappy.compress(dataArrayString);
+
+        batchData.clear();
+        long save_start_time = new Date().getTime();
+        saveData(data_byte);
+        long save_end_time = new Date().getTime();
+        System.out.println("序列化时间:   "+(save_end_time - save_start_time));
+
     }
 
 
@@ -134,11 +99,11 @@ public class DataLakeClient implements Serializable {
     /**
      * 获得表结构
      *
-     * @param tableName
+     * @param
      * @return
      * @throws Exception
      */
-    public TableStructure getTableStructure(String tableName) throws Exception {
+    public TableStructure getTableStructure() throws Exception {
 
         Map<String, String> jsonObject = new HashMap<>();
         jsonObject.put("sql", "desc " + tableName);
@@ -164,7 +129,7 @@ public class DataLakeClient implements Serializable {
     /**
      * 删除表
      */
-    public int dropTable(String tableName) throws Exception {
+    public int dropTable() throws Exception {
         Map<String, String> jsonObject = new HashMap<>();
         jsonObject.put("sql", "drop " + tableName);
         String data = new Gson().toJson(jsonObject);
@@ -185,8 +150,7 @@ public class DataLakeClient implements Serializable {
     /**
      * 添加列 有默认值的
      */
-    public int alterTableAdd(String tableName,
-                             String column,
+    public int alterTableAdd(String column,
                              String type,
                              String defaultValue) throws Exception {
 
@@ -213,8 +177,7 @@ public class DataLakeClient implements Serializable {
     /**
      * 添加列 无默认值的
      */
-    public int alterTableAdd(String tableName,
-                             String column,
+    public int alterTableAdd(String column,
                              String type
     ) throws Exception {
 
@@ -237,8 +200,7 @@ public class DataLakeClient implements Serializable {
     /**
      * 添加列 无默认值的
      */
-    public int alterTableDelete(String tableName,
-                                String column
+    public int alterTableDelete( String column
     ) throws Exception {
 
         Map<String, String> jsonObject = new HashMap<>();
@@ -261,7 +223,7 @@ public class DataLakeClient implements Serializable {
     /**
      * 获得表内每个分区最大的offset
      */
-    public Map<Integer, Long> getMaxOffset(String tableName) throws Exception {
+    public Map<Integer, Long> getMaxOffset() throws Exception {
 
         Map<String, String> jsonObject = new HashMap<>();
         jsonObject.put("sql", "MAX_OFFSET "+tableName);
@@ -291,7 +253,7 @@ public class DataLakeClient implements Serializable {
      *
      * @throws Exception
      */
-    public void compress(String tableName) throws Exception {
+    public void compress() throws Exception {
         Map<String, String > jsonObject = new HashMap<>();
         jsonObject.put("compress_table", tableName);
         byte[] data = new Gson().toJson(jsonObject).getBytes();
@@ -317,17 +279,10 @@ public class DataLakeClient implements Serializable {
         byte[] bi = "\"batch_insert\"".getBytes();
         out.writeInt(bi.length);
         out.write(bi);
-        System.out.println("发送了  batch_insert");
-
         out.writeInt(data.length);
-        System.out.println("1111111111111111");
         out.write(data);
-        System.out.println("发送了数据");
         out.flush();
 
-        LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
-        System.out.println("客户端发送数据完成的时间：    "+now.format(formatter));
 
         int is = in.readInt();
 

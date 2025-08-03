@@ -1,4 +1,4 @@
-package com.shenxu.cn.entity;
+package com.datalake.cn.entity;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;

@@ -1,10 +1,10 @@
-package com.shenxu.cn.client;
+package com.datalake.cn.client;
 
 
+import com.datalake.cn.entity.LineData;
 import com.google.gson.Gson;
-import com.shenxu.cn.bincode.BinCodeDeserialize;
-import com.shenxu.cn.entity.DataLakeStreamData;
-import com.shenxu.cn.entity.LineData;
+import com.datalake.cn.bincode.BinCodeDeserialize;
+import com.datalake.cn.entity.DataLakeStreamData;
 import org.xerial.snappy.Snappy;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -58,6 +58,11 @@ public class DataLakeStreamClient implements Serializable {
             jsonObject.put("offset", offset + 1);
             PartitionCodeAndOffSet.add(jsonObject);
         }
+    }
+
+
+    public Map<Integer, Long> getOffsetSave(){
+        return this.offsetSave;
     }
 
     public void setPartitionCodeAndOffSet(int partitioncode, long offset) {
@@ -117,10 +122,16 @@ public class DataLakeStreamClient implements Serializable {
                 byte[] mess = new byte[mess_len];
                 in.readFully(mess);
                 byte[] uncompressedData = Snappy.uncompress(mess);
-
+                long dese_time = new Date().getTime();
                 List<DataLakeStreamData> dataLakeStreamDataList = this.deserialize(uncompressedData);
-
-                resList.addAll(dataLakeStreamDataList);
+                long dese_me = new Date().getTime();
+                System.out.println("反序列化速度: "+(dese_me - dese_time));
+                for (DataLakeStreamData dataLakeStreamData: dataLakeStreamDataList){
+                    Integer partitionCode = dataLakeStreamData.getPartitionCode();
+                    Long offset = dataLakeStreamData.getOffset();
+                    offsetSave.put(partitionCode, offset);
+                    resList.add(dataLakeStreamData);
+                }
             }
         }
 
@@ -145,7 +156,7 @@ public class DataLakeStreamClient implements Serializable {
         // 按字段顺序解析
         String tableName = binCodeDeserialize.getString();
         String majorValue = binCodeDeserialize.getString();
-        Map<String, String> dataMap = binCodeDeserialize.getHashMap();
+        Map<String, Object> dataMap = binCodeDeserialize.getHashMap();
         String crudType = binCodeDeserialize.getString();
         String partitionCode = binCodeDeserialize.getString();
         long offset = binCodeDeserialize.getLong(); // i64

@@ -40,22 +40,46 @@ public class DataLakeLinkData implements Serializable {
     }
 
     public Long getLong(String column){
-        String value = fields.get(column).toString();
-        return Long.valueOf(value);
+        Object value = fields.get(column);
+        if (SignClass.NULL_STR.equals(value)){
+            return null;
+        }else {
+            return Long.valueOf(value.toString());
+        }
     }
 
     public Integer getInt(String column){
-        String value = fields.get(column).toString();
-        return Integer.valueOf(value);
+        Object value = fields.get(column);
+        if (SignClass.NULL_STR.equals(value)){
+            return null;
+        }else {
+            return Integer.valueOf(value.toString());
+        }
+
+
     }
     public Float getFloat(String column){
-        String value = fields.get(column).toString();
-        return Float.valueOf(value);
+        Object value = fields.get(column);
+
+        if (SignClass.NULL_STR.equals(value)){
+            return null;
+        }else {
+            return Float.valueOf(value.toString());
+        }
+
+
     }
 
     public Boolean getBoolean(String column){
-        String value = fields.get(column).toString();
-        return Boolean.valueOf(value);
+        Object value = fields.get(column);
+
+        if (SignClass.NULL_STR.equals(value)){
+            return null;
+        }else {
+            return Boolean.valueOf(value.toString());
+        }
+
+
     }
 
     public void insert(){

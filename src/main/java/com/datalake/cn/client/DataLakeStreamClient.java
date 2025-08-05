@@ -1,7 +1,7 @@
 package com.datalake.cn.client;
 
 
-import com.datalake.cn.entity.LineData;
+import com.datalake.cn.entity.DataLakeLinkData;
 import com.google.gson.Gson;
 import com.datalake.cn.bincode.BinCodeDeserialize;
 import com.datalake.cn.entity.DataLakeStreamData;
@@ -161,8 +161,8 @@ public class DataLakeStreamClient implements Serializable {
         String partitionCode = binCodeDeserialize.getString();
         long offset = binCodeDeserialize.getLong(); // i64
 
-        LineData lineData = new LineData();
-        lineData.setMap(dataMap);
+        DataLakeLinkData dataLakeLinkData = new DataLakeLinkData();
+        dataLakeLinkData.setMap(dataMap);
 
 
         return new DataLakeStreamData(
@@ -171,7 +171,7 @@ public class DataLakeStreamClient implements Serializable {
                 crudType,
                 Integer.valueOf(partitionCode),
                 offset,
-                lineData
+                dataLakeLinkData
         );
     }
 

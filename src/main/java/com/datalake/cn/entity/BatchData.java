@@ -16,11 +16,13 @@ public class BatchData {
 
     public BatchData(List<String> insertColumnName) throws Exception {
 
-        insertColumnName.add(SignClass.INSERT_KEY);
+        insertColumnName = new ArrayList<>(insertColumnName);
 
         if (insertColumnName.size() == 0) {
             throw new Exception("insertColumnName size 不能为 0");
         }
+
+        insertColumnName.add(SignClass.INSERT_KEY);
 
         Set<String> set = new HashSet<>(insertColumnName);
         if (set.size() != insertColumnName.size()) {
@@ -35,10 +37,10 @@ public class BatchData {
     /**
      * 将 line 放置到 批中
      *
-     * @param lineData
+     * @param dataLakeLinkData
      */
-    public void putLineData(LineData lineData) throws Exception {
-        Map<String, Object> dataMap = lineData.getMap();
+    public void putLineData(DataLakeLinkData dataLakeLinkData) throws Exception {
+        Map<String, Object> dataMap = dataLakeLinkData.getMap();
 
         Set<String> set = dataMap.keySet();
         for (String col : set) {

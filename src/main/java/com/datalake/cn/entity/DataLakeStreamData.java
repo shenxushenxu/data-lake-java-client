@@ -13,7 +13,7 @@ public class DataLakeStreamData {
     private long offset;
 
 //    @SerializedName("data")
-    private LineData data;
+    private DataLakeLinkData data;
 
     @Override
     public String toString() {
@@ -34,7 +34,7 @@ public class DataLakeStreamData {
                               String crudType,
                               int partitionCode,
                               long offset,
-                              LineData data) {
+                              DataLakeLinkData data) {
         this.tableName = tableName;
         this.majorValue = majorValue;
         this.crudType = crudType;
@@ -73,7 +73,7 @@ public class DataLakeStreamData {
         return offset;
     }
 
-    public LineData getData() {
+    public DataLakeLinkData getData() {
         return data;
     }
 

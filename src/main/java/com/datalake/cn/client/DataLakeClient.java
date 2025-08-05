@@ -2,7 +2,7 @@ package com.datalake.cn.client;
 
 
 import com.datalake.cn.entity.BatchData;
-import com.datalake.cn.entity.LineData;
+import com.datalake.cn.entity.DataLakeLinkData;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.datalake.cn.entity.TableStructure;
@@ -50,11 +50,11 @@ public class DataLakeClient implements Serializable {
 
     /**
      * 将 line 放置到 批中
-     * @param lineData
+     * @param dataLakeLinkData
      */
-    public void putLineData(LineData lineData) throws Exception {
+    public void putLineData(DataLakeLinkData dataLakeLinkData) throws Exception {
 
-        batchData.putLineData(lineData);
+        batchData.putLineData(dataLakeLinkData);
     }
 
 
@@ -71,20 +71,13 @@ public class DataLakeClient implements Serializable {
         if (tableName == null || "".equals(tableName)) {
             throw new Exception("tableName 为 null");
         }
-        long start_time = new Date().getTime();
+
         byte[] dataArrayString = batchData.serializeToBincode();
-        long end_time = new Date().getTime();
-
-        System.out.println("序列化时间:   "+(end_time - start_time));
-
 
         byte[] data_byte = Snappy.compress(dataArrayString);
 
         batchData.clear();
-        long save_start_time = new Date().getTime();
         saveData(data_byte);
-        long save_end_time = new Date().getTime();
-        System.out.println("序列化时间:   "+(save_end_time - save_start_time));
 
     }
 

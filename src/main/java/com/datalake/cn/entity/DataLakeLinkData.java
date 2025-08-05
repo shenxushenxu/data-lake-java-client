@@ -11,7 +11,7 @@ import java.util.Map;
 
 
 
-public class LineData implements Serializable {
+public class DataLakeLinkData implements Serializable {
 
 
     private Map<String, Object> fields;
@@ -23,7 +23,7 @@ public class LineData implements Serializable {
         return gson.toJson(fields);
     }
 
-    public LineData(){
+    public DataLakeLinkData(){
         fields = new HashMap<String, Object>();
     }
 

@@ -19,8 +19,7 @@ public class DataLakeLinkData implements Serializable {
 
     @Override
     public String toString() {
-        Gson gson = new Gson();
-        return gson.toJson(fields);
+        return fields.toString();
     }
 
     public DataLakeLinkData(){
@@ -36,12 +35,17 @@ public class DataLakeLinkData implements Serializable {
     }
 
     public String getString(String column){
-        return fields.get(column).toString();
+        Object value = fields.get(column);
+        if (value == null){
+            return null;
+        }else {
+            return value.toString();
+        }
     }
 
     public Long getLong(String column){
         Object value = fields.get(column);
-        if (SignClass.NULL_STR.equals(value)){
+        if (value == null){
             return null;
         }else {
             return Long.valueOf(value.toString());
@@ -50,7 +54,7 @@ public class DataLakeLinkData implements Serializable {
 
     public Integer getInt(String column){
         Object value = fields.get(column);
-        if (SignClass.NULL_STR.equals(value)){
+        if (value == null){
             return null;
         }else {
             return Integer.valueOf(value.toString());
@@ -61,7 +65,7 @@ public class DataLakeLinkData implements Serializable {
     public Float getFloat(String column){
         Object value = fields.get(column);
 
-        if (SignClass.NULL_STR.equals(value)){
+        if (value == null){
             return null;
         }else {
             return Float.valueOf(value.toString());
@@ -73,7 +77,7 @@ public class DataLakeLinkData implements Serializable {
     public Boolean getBoolean(String column){
         Object value = fields.get(column);
 
-        if (SignClass.NULL_STR.equals(value)){
+        if (value == null){
             return null;
         }else {
             return Boolean.valueOf(value.toString());

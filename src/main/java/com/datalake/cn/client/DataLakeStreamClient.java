@@ -122,10 +122,10 @@ public class DataLakeStreamClient implements Serializable {
                 byte[] mess = new byte[mess_len];
                 in.readFully(mess);
                 byte[] uncompressedData = Snappy.uncompress(mess);
-                long dese_time = new Date().getTime();
+
                 List<DataLakeStreamData> dataLakeStreamDataList = this.deserialize(uncompressedData);
-                long dese_me = new Date().getTime();
-                System.out.println("反序列化速度: "+(dese_me - dese_time));
+
+
                 for (DataLakeStreamData dataLakeStreamData: dataLakeStreamDataList){
                     Integer partitionCode = dataLakeStreamData.getPartitionCode();
                     Long offset = dataLakeStreamData.getOffset();
@@ -158,7 +158,7 @@ public class DataLakeStreamClient implements Serializable {
         String majorValue = binCodeDeserialize.getString();
         Map<String, Object> dataMap = binCodeDeserialize.getHashMap();
         String crudType = binCodeDeserialize.getString();
-        String partitionCode = binCodeDeserialize.getString();
+        int partitionCode = binCodeDeserialize.getInt();
         long offset = binCodeDeserialize.getLong(); // i64
 
         DataLakeLinkData dataLakeLinkData = new DataLakeLinkData();
@@ -169,7 +169,7 @@ public class DataLakeStreamClient implements Serializable {
                 tableName,
                 majorValue,
                 crudType,
-                Integer.valueOf(partitionCode),
+                partitionCode,
                 offset,
                 dataLakeLinkData
         );

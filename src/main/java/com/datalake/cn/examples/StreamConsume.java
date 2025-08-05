@@ -10,7 +10,9 @@ import java.util.Map;
 public class StreamConsume {
     public static void main(String[] args) throws Exception {
 
-        int count = Integer.valueOf(args[0]);
+//        int count = Integer.valueOf(args[0]);
+
+        int count = 1;
 
         DataLakeStreamClient dataLakeStreamClient = new DataLakeStreamClient("hadoop101", 7853);
 
@@ -24,29 +26,26 @@ public class StreamConsume {
 //        dataLakeStreamClient.setPartitionCodeAndOffSet(3,2003);
 //        dataLakeStreamClient.setPartitionCodeAndOffSet(4,0);
 //        dataLakeStreamClient.setPartitionCodeAndOffSet(5,2003);
-//        int i = 0;
-//        while (true){
+        int i = 0;
+        while (true) {
 
 
-
-        long start_time = new Date().getTime();
-        List<DataLakeStreamData> list = dataLakeStreamClient.load();
-        long end_time = new Date().getTime();
-        System.out.println("读取的总时间：  " + (end_time - start_time));
-
+            long start_time = new Date().getTime();
+            List<DataLakeStreamData> list = dataLakeStreamClient.load();
+            long end_time = new Date().getTime();
+            System.out.println("读取的总时间：  " + (end_time - start_time));
 
 
-//            Map<Integer, Long> mm = dataLakeStreamClient.getOffsetSave();
+            Map<Integer, Long> mm = dataLakeStreamClient.getOffsetSave();
 
+            for (DataLakeStreamData dataLakeData : list) {
+                i++;
+                System.out.println(mm + "  kk :   " + i + "    " + dataLakeData);
+            }
 
-//            for (DataLakeStreamData dataLakeData : list){
-//                 i ++;
-//                System.out.println(mm+"  kk :   "+ i + "    "+ dataLakeData);
-//            }
-
-//            System.out.println(dataLakeStreamClient.getOffsetSave());
-//        }
-
-
+            System.out.println(dataLakeStreamClient.getOffsetSave());
+        }
     }
+
+
 }

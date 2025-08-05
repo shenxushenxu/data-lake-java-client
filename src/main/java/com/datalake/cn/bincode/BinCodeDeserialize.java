@@ -1,5 +1,7 @@
 package com.datalake.cn.bincode;
 
+import com.datalake.cn.entity.SignClass;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -22,7 +24,12 @@ public class BinCodeDeserialize {
         for (int i = 0; i < mapSize; i++) {
             String key = this.getString();
             String value = this.getString();
-            map.put(key, value);
+            if (SignClass.NULL_STR.equals(value)){
+                map.put(key, null);
+            }else {
+                map.put(key, value);
+            }
+
         }
 
         return map;
@@ -30,6 +37,9 @@ public class BinCodeDeserialize {
 
     public long getLong(){
         return buffer.getLong();
+    }
+    public int getInt(){
+        return buffer.getInt();
     }
     public String getString(){
         // 读取字符串长度 (u64)

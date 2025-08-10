@@ -18,8 +18,8 @@ public class BinCodeDeserialize {
 
     public Map<String, Object> getHashMap() {
         // 读取 HashMap 大小 (u64)
-        long mapSize = buffer.getLong();
-        Map<String, Object> map = new HashMap<>((int) mapSize);
+        int mapSize = buffer.getInt();
+        Map<String, Object> map = new HashMap<>(mapSize);
 
         for (int i = 0; i < mapSize; i++) {
             String key = this.getString();
@@ -29,9 +29,7 @@ public class BinCodeDeserialize {
             }else {
                 map.put(key, value);
             }
-
         }
-
         return map;
     }
 
@@ -42,9 +40,9 @@ public class BinCodeDeserialize {
         return buffer.getInt();
     }
     public String getString(){
-        // 读取字符串长度 (u64)
-        long len = buffer.getLong();
-        byte[] bytes = new byte[(int) len];
+        // 读取字符串长度 (i32)
+        int len = buffer.getInt();
+        byte[] bytes = new byte[len];
         buffer.get(bytes);
         return new String(bytes, StandardCharsets.UTF_8);
     }

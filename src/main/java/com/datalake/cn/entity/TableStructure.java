@@ -9,6 +9,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class TableStructure implements Serializable {
 
@@ -20,14 +21,17 @@ public class TableStructure implements Serializable {
     private List<ColumnDefinition> column;
 
     public TableStructure(String tablestructure){
+        String partitionAddressKey = "partition_address";
+        String tableNameKey = "table_name";
+        String majorKey = "major_key";
+        String partitionNumberKey = "partition_number";
 
         Gson gson = new Gson();
         Map<String, String> jsonMap = gson.fromJson(tablestructure, new TypeToken<Map<String, String>>() { }.getType());
-        String partition_address = jsonMap.get("partition_address");
-        String table_name = jsonMap.get("table_name");
-        String map_column = jsonMap.get("column");
-        String major_key = jsonMap.get("major_key");
-        String partition_number = jsonMap.get("partition_number");
+        String partition_address = jsonMap.get(partitionAddressKey);
+        String table_name = jsonMap.get(tableNameKey);
+        String major_key = jsonMap.get(majorKey);
+        String partition_number = jsonMap.get(partitionNumberKey);
 
 
         this.tableName = table_name;
@@ -37,17 +41,20 @@ public class TableStructure implements Serializable {
 
         this.partitionAddress = gson.fromJson(partition_address, new TypeToken<Map<String, List<PartitionInfo>>>() { }.getType());
 
-        Type mapListType = new TypeToken<List<Map<String, String>>>() {}.getType();
-        List<Map<String, String>> rawList = gson.fromJson(map_column, mapListType);
 
         // 第二步：转换为结构化对象
         column = new ArrayList<>();
-        for (Map<String, String> raw : rawList) {
-            raw.forEach((columnName, configJson) -> {
-                // 解析嵌套的 JSON 字符串
+
+        Set<String> keySet = jsonMap.keySet();
+        for (String key : keySet) {
+
+            if (!partitionAddressKey.equals(key) && !tableNameKey.equals(key) && !majorKey.equals(key) && !partitionNumberKey.equals(key)){
+                String configJson = jsonMap.get(key);
+
                 ColumnConfig config = gson.fromJson(configJson, ColumnConfig.class);
-                column.add(new ColumnDefinition(columnName, config));
-            });
+                column.add(new ColumnDefinition(key, config));
+
+            }
         }
 
     }

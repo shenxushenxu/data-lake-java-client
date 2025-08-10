@@ -121,6 +121,7 @@ public class DataLakeStreamClient implements Serializable {
             } else {
                 byte[] mess = new byte[mess_len];
                 in.readFully(mess);
+
                 byte[] uncompressedData = Snappy.uncompress(mess);
 
                 List<DataLakeStreamData> dataLakeStreamDataList = this.deserialize(uncompressedData);
@@ -142,8 +143,8 @@ public class DataLakeStreamClient implements Serializable {
     private List<DataLakeStreamData> deserialize(byte[] bytes){
         BinCodeDeserialize binCodeDeserialize = new BinCodeDeserialize(bytes);
 
-        long listSize = binCodeDeserialize.getLong();
-        List<DataLakeStreamData> result = new ArrayList<>((int) listSize);
+        int listSize = binCodeDeserialize.getInt();
+        List<DataLakeStreamData> result = new ArrayList<>(listSize);
 
         for (int i = 0; i < listSize; i++) {
             result.add(parseDataLakeStreamData(binCodeDeserialize));

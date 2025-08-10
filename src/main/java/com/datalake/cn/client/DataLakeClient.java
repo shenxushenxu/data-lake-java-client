@@ -101,7 +101,9 @@ public class DataLakeClient implements Serializable {
         Map<String, String> jsonObject = new HashMap<>();
         jsonObject.put("sql", "desc " + tableName);
         String data = new Gson().toJson(jsonObject);
-        out.write(data.getBytes());
+        byte[] bytes = data.getBytes();
+        out.writeInt(bytes.length);
+        out.write(bytes);
         out.flush();
         int is = in.readInt();
         if (is == -2) {
@@ -116,7 +118,6 @@ public class DataLakeClient implements Serializable {
             String tableStructure = new String(mess);
             return new TableStructure(tableStructure);
         }
-
     }
 
     /**
@@ -126,7 +127,9 @@ public class DataLakeClient implements Serializable {
         Map<String, String> jsonObject = new HashMap<>();
         jsonObject.put("sql", "drop " + tableName);
         String data = new Gson().toJson(jsonObject);
-        out.write(data.getBytes());
+        byte[] bytes = data.getBytes();
+        out.writeInt(bytes.length);
+        out.write(bytes);
         out.flush();
         int is = in.readInt();
         if (is == -2) {
@@ -154,7 +157,9 @@ public class DataLakeClient implements Serializable {
                 + type + " "
                 + "DEFAULT " + defaultValue);
         String data = new Gson().toJson(jsonObject);
-        out.write(data.getBytes());
+        byte[] bytes = data.getBytes();
+        out.writeInt(bytes.length);
+        out.write(bytes);
         out.flush();
         int is = in.readInt();
         if (is == -2) {
@@ -177,7 +182,9 @@ public class DataLakeClient implements Serializable {
         Map<String, String> jsonObject = new HashMap<>();
         jsonObject.put("sql", "ALTER TABLE " + tableName + " ADD " + column + " " + type);
         String data = new Gson().toJson(jsonObject);
-        out.write(data.getBytes());
+        byte[] bytes = data.getBytes();
+        out.writeInt(bytes.length);
+        out.write(bytes);
         out.flush();
         int is = in.readInt();
         if (is == -2) {
@@ -199,7 +206,9 @@ public class DataLakeClient implements Serializable {
         Map<String, String> jsonObject = new HashMap<>();
         jsonObject.put("sql", "ALTER TABLE "+tableName+" OROP "+column);
         String data = new Gson().toJson(jsonObject);
-        out.write(data.getBytes());
+        byte[] bytes = data.getBytes();
+        out.writeInt(bytes.length);
+        out.write(bytes);
         out.flush();
         int is = in.readInt();
         if (is == -2) {
@@ -221,7 +230,9 @@ public class DataLakeClient implements Serializable {
         Map<String, String> jsonObject = new HashMap<>();
         jsonObject.put("sql", "MAX_OFFSET "+tableName);
         String data = new Gson().toJson(jsonObject);
-        out.write(data.getBytes());
+        byte[] bytes = data.getBytes();
+        out.writeInt(bytes.length);
+        out.write(bytes);
         out.flush();
         int is = in.readInt();
         if (is == -2) {

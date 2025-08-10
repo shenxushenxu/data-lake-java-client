@@ -10,17 +10,17 @@ import java.util.Map;
 public class StreamConsume {
     public static void main(String[] args) throws Exception {
 
-//        int count = Integer.valueOf(args[0]);
+        int count = Integer.valueOf(args[0]);
 
-        int count = 1;
+//        int count = 10000;
 
-        DataLakeStreamClient dataLakeStreamClient = new DataLakeStreamClient("hadoop101", 7853);
+        DataLakeStreamClient dataLakeStreamClient = new DataLakeStreamClient("127.0.0.1", 7853);
 
         dataLakeStreamClient.setReadCount(count);
         dataLakeStreamClient.setTableName("policy_info");
 
         // 如果你自己保存了offset 可以设置从 某个offset开始消费，有几个分区调用几次
-//        dataLakeStreamClient.setPartitionCodeAndOffSet(0,0);
+//        dataLakeStreamClient.setPartitionCodeAndOffSet(0,499990);
 //        dataLakeStreamClient.setPartitionCodeAndOffSet(1,2003);
 //        dataLakeStreamClient.setPartitionCodeAndOffSet(2,2003);
 //        dataLakeStreamClient.setPartitionCodeAndOffSet(3,2003);
@@ -38,12 +38,17 @@ public class StreamConsume {
 
             Map<Integer, Long> mm = dataLakeStreamClient.getOffsetSave();
 
-            for (DataLakeStreamData dataLakeData : list) {
-                i++;
-                System.out.println(mm + "  kk :   " + i + "    " + dataLakeData);
+//            for (DataLakeStreamData dataLakeData : list) {
+//                i++;
+//                System.out.println(mm + "  kk :   " + i + "    " + dataLakeData);
+//            }
+
+            System.out.println(mm);
+
+            if (list.size() == 0){
+                break;
             }
 
-            System.out.println(dataLakeStreamClient.getOffsetSave());
         }
     }
 

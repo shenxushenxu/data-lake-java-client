@@ -7,10 +7,7 @@ import java.util.*;
 
 public class BatchData {
 
-
-
     private String tableName;
-    private int partitionCode = -1;
     private List<String> insertColumnName;
     private List<String[]> list;
 
@@ -84,36 +81,38 @@ public class BatchData {
      * @return
      */
     public byte[] serializeToBincode() {
+
         BinCodeSerialize binCodeSerialize = new BinCodeSerialize();
 
         try {
-
             byte[] tableNameBytes = this.tableName.getBytes(StandardCharsets.UTF_8);
-            binCodeSerialize.setLong(tableNameBytes.length);  // u64 长度前缀
+            binCodeSerialize.setInt(tableNameBytes.length);  // u64 长度前缀
             binCodeSerialize.setBytes(tableNameBytes);
 
 
             int columnSize = this.insertColumnName.size();
-            // 序列化数组：长度前缀(8字节) + 元素序列化
-            binCodeSerialize.setLong(columnSize);
+
+            binCodeSerialize.setInt(columnSize);
             for (String columnName : this.insertColumnName) {
                 byte[] columnBytes = columnName.getBytes(StandardCharsets.UTF_8);
-                binCodeSerialize.setLong(columnBytes.length);  // u64 长度前缀
+                binCodeSerialize.setInt(columnBytes.length);  // u64 长度前缀
                 binCodeSerialize.setBytes(columnBytes);
             }
 
-//            System.out.println(Arrays.toString(binCodeSerialize.getBytes()));
-
-            // 序列化数组：长度前缀(8字节) + 元素序列化
-            binCodeSerialize.setLong(this.list.size());
+            int listSize = this.list.size();
+            binCodeSerialize.setInt(listSize);
             for (String[] valueArray : this.list) {
-                binCodeSerialize.setLong(valueArray.length);
+
+                binCodeSerialize.setInt(valueArray.length);
+
                 for (String value : valueArray) {
-                    byte[] colBytes = value.toString().getBytes(StandardCharsets.UTF_8);
-                    binCodeSerialize.setLong(colBytes.length);  // u64 长度前缀
+
+                    byte[] colBytes = value.getBytes(StandardCharsets.UTF_8);
+                    binCodeSerialize.setInt(colBytes.length);  // u64 长度前缀
                     binCodeSerialize.setBytes(colBytes);
                 }
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -19,24 +19,20 @@ public class DataLakeStreamClient implements Serializable {
     private DataOutputStream out;
     private DataInputStream in;
     private List<Map<String, Long>> PartitionCodeAndOffSet;
-    private String TableName;
+    private String tableName;
     public Map<Integer, Long> offsetSave;
     private int readCount;
 
-    public DataLakeStreamClient(String serverAddress, int serverPort) throws IOException {
+    public DataLakeStreamClient(String serverAddress, int serverPort, String tableName) throws IOException {
         socket = new Socket(serverAddress, serverPort);
         out = new DataOutputStream(socket.getOutputStream());
         in = new DataInputStream(socket.getInputStream());
 
         this.PartitionCodeAndOffSet = new ArrayList();
         this.offsetSave = new HashMap<Integer, Long>();
+        this.tableName = tableName;
     }
 
-
-    public void setTableName(String tableName) {
-        this.TableName = tableName;
-
-    }
 
     public void setReadCount(int readCount) {
         this.readCount = readCount;
@@ -51,8 +47,6 @@ public class DataLakeStreamClient implements Serializable {
         for (Integer partitioncode : keySet) {
 
             long offset = offsetSave.get(partitioncode);
-
-
             Map<String, Long> jsonObject = new HashMap<>();
             jsonObject.put("patition_code", Long.valueOf(partitioncode));
             jsonObject.put("offset", offset + 1);
@@ -74,10 +68,6 @@ public class DataLakeStreamClient implements Serializable {
 
     public List<DataLakeStreamData> load() throws Exception {
 
-        if (TableName == null || "".equals(TableName)) {
-            throw new Exception("TableName 为 null");
-        }
-
         if (readCount == 0) {
             throw new Exception("readCount 为 0");
         }
@@ -88,7 +78,7 @@ public class DataLakeStreamClient implements Serializable {
         // 获取输入输出流
 
         Map<String, Object> stream_read = new HashMap<>();
-        stream_read.put("table_name", TableName);
+        stream_read.put("table_name", tableName);
         stream_read.put("read_count", readCount);
         stream_read.put("patition_mess", PartitionCodeAndOffSet);
 

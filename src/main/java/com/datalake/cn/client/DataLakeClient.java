@@ -50,13 +50,30 @@ public class DataLakeClient implements Serializable {
 
     /**
      * 将 line 放置到 批中
-     * @param dataLakeLinkData
+     * @param batchData
      */
-    public void putLineData(DataLakeLinkData dataLakeLinkData) throws Exception {
+    public void putBatchData(BatchData batchData) throws Exception {
 
-        batchData.putLineData(dataLakeLinkData);
+        if (batchData.getSize() != 0){
+
+            if (this.tableName != null && !"".equals(this.tableName)){
+                batchData.setTableName(tableName);
+            }
+            this.batchData = batchData;
+        }else {
+            throw new Exception("batchData size不能为0");
+        }
+
     }
 
+    /**
+     * 将 line 放置到 批中
+     * @param dataLakeLinkData
+     */
+    public void putDataLakeLinkData(DataLakeLinkData dataLakeLinkData) throws Exception {
+
+        batchData.putDataLakeLinkData(dataLakeLinkData);
+    }
 
     /**
      * 执行插入的方法

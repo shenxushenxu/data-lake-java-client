@@ -19,7 +19,7 @@ public class BatchData {
             throw new Exception("insertColumnName size 不能为 0");
         }
 
-        insertColumnName.add(SignClass.INSERT_KEY);
+        insertColumnName.add(SignClass.LINKDATA_KEY);
 
         Set<String> set = new HashSet<>(insertColumnName);
         if (set.size() != insertColumnName.size()) {
@@ -36,7 +36,7 @@ public class BatchData {
      *
      * @param dataLakeLinkData
      */
-    public void putLineData(DataLakeLinkData dataLakeLinkData) throws Exception {
+    public void putDataLakeLinkData(DataLakeLinkData dataLakeLinkData) throws Exception {
         Map<String, Object> dataMap = dataLakeLinkData.getMap();
 
         Set<String> set = dataMap.keySet();
@@ -51,7 +51,7 @@ public class BatchData {
             String columnName = this.insertColumnName.get(i);
             Object value = dataMap.get(columnName);
             if (value == null || "".equals(value)) {
-                if (SignClass.INSERT_KEY.equals(columnName)) {
+                if (SignClass.LINKDATA_KEY.equals(columnName)) {
                     throw new Exception("LineData 未标识操作行为 (lineData.insert(), lineData.delete())");
                 }
                 value = SignClass.NULL_STR;

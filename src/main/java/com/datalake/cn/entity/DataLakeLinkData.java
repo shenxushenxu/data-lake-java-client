@@ -87,11 +87,11 @@ public class DataLakeLinkData implements Serializable {
     }
 
     public void insert(){
-        fields.put(SignClass.INSERT_KEY, "insert");
+        fields.put(SignClass.LINKDATA_KEY, SignClass.LINKDATA_INSERT);
     }
 
     public void delete(){
-        fields.put(SignClass.INSERT_KEY, "delete");
+        fields.put(SignClass.LINKDATA_KEY, SignClass.LINKDATA_DELETE);
     }
 
     public String toJSONString(){

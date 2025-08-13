@@ -14,10 +14,10 @@ public class StreamConsume {
 
 //        int count = 10000;
 
-        DataLakeStreamClient dataLakeStreamClient = new DataLakeStreamClient("127.0.0.1", 7853);
+        DataLakeStreamClient dataLakeStreamClient = new DataLakeStreamClient("127.0.0.1", 7853,"policy_info");
 
         dataLakeStreamClient.setReadCount(count);
-        dataLakeStreamClient.setTableName("policy_info");
+
 
         // 如果你自己保存了offset 可以设置从 某个offset开始消费，有几个分区调用几次
 //        dataLakeStreamClient.setPartitionCodeAndOffSet(0,499990);

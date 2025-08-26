@@ -10,11 +10,11 @@ import java.util.Map;
 public class StreamConsume {
     public static void main(String[] args) throws Exception {
 
-        int count = Integer.valueOf(args[0]);
+//        int count = Integer.valueOf(args[0]);  keyno
 
-//        int count = 10000;
+        int count = 10000;
 
-        DataLakeStreamClient dataLakeStreamClient = new DataLakeStreamClient("127.0.0.1", 7853,"policy_info");
+        DataLakeStreamClient dataLakeStreamClient = new DataLakeStreamClient("hadoop101", 7853,"info_qcc_shangshi");
 
         dataLakeStreamClient.setReadCount(count);
 
@@ -33,17 +33,26 @@ public class StreamConsume {
             long start_time = new Date().getTime();
             List<DataLakeStreamData> list = dataLakeStreamClient.load();
             long end_time = new Date().getTime();
-            System.out.println("读取的总时间：  " + (end_time - start_time));
+//            System.out.println("读取的总时间：  " + (end_time - start_time));
 
 
             Map<Integer, Long> mm = dataLakeStreamClient.getOffsetSave();
 
-//            for (DataLakeStreamData dataLakeData : list) {
-//                i++;
-//                System.out.println(mm + "  kk :   " + i + "    " + dataLakeData);
-//            }
+            for (DataLakeStreamData dataLakeData : list) {
 
-            System.out.println(mm);
+
+
+                i++;
+                String keyno = dataLakeData.getData().getString("keyno");
+                if (keyno == null){
+                    System.out.println(mm + "  kk :   " + i + "    " + dataLakeData);
+                }
+
+
+
+            }
+
+//            System.out.println(mm);
 
             if (list.size() == 0){
                 break;

@@ -99,6 +99,21 @@ public class TableStructure implements Serializable {
         this.column = column;
     }
 
+    public List<String> getColumnNames(){
+        List<String> columnNames = new ArrayList<>(column.size());
+
+        for (int i=0;i<column.size();i++){
+            ColumnDefinition cd = column.get(i);
+
+            String columnName = cd.getColumnName();
+            columnNames.add(columnName);
+        }
+
+        return columnNames;
+    }
+
+
+
     @Override
     public String toString() {
         return "TableStructure{" +

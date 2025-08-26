@@ -10,6 +10,7 @@ public class BatchData {
     private String tableName;
     private List<String> insertColumnName;
     private List<String[]> list;
+    private BinCodeSerialize binCodeSerialize = new BinCodeSerialize();
 
     public BatchData(List<String> insertColumnName) throws Exception {
 
@@ -71,7 +72,7 @@ public class BatchData {
     }
 
     public void clear() {
-        list.clear();
+        list = new ArrayList<>();
     }
 
 
@@ -115,6 +116,8 @@ public class BatchData {
 
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            this.clear();
         }
         return binCodeSerialize.getBytes();
     }

@@ -93,7 +93,6 @@ public class DataLakeClient implements Serializable {
 
         byte[] data_byte = Snappy.compress(dataArrayString);
 
-        batchData.clear();
         saveData(data_byte);
 
     }

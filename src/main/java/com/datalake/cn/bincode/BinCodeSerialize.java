@@ -10,20 +10,31 @@ import java.util.Arrays;
 public class BinCodeSerialize {
 
 
-    private final ByteBuffer stream;
+    private final ByteArrayOutputStream stream;
 
     // 改为实例变量（非线程安全设计）
     private final byte[] fourByteArray = new byte[4];
     private final byte[] eightByteArray = new byte[8];
 
+//    public BinCodeSerialize(int size) {
+//        stream = ByteBuffer.allocate(size);
+//    }
+//
+//    public BinCodeSerialize() {
+//        stream = ByteBuffer.allocate(500 * 1024 * 1024);
+//
+//    }
+
+
     public BinCodeSerialize(int size) {
-        stream = ByteBuffer.allocate(size);
+        stream = new ByteArrayOutputStream(size);
     }
 
     public BinCodeSerialize() {
-        stream = ByteBuffer.allocate(500 * 1024 * 1024);
+        stream = new ByteArrayOutputStream(5 * 1024 * 1024);
 
     }
+
 
     public void setInt(int value) throws IOException {
         // 小端序写入（去除冗余位与操作）
@@ -31,7 +42,7 @@ public class BinCodeSerialize {
         fourByteArray[1] = (byte) (value >>> 8);
         fourByteArray[2] = (byte) (value >>> 16);
         fourByteArray[3] = (byte) (value >>> 24);
-        stream.put(fourByteArray, 0, 4);
+        stream.write(fourByteArray, 0, 4);
     }
 
     public void setLong(long value) throws IOException {
@@ -44,7 +55,7 @@ public class BinCodeSerialize {
         eightByteArray[5] = (byte) (value >>> 40);
         eightByteArray[6] = (byte) (value >>> 48);
         eightByteArray[7] = (byte) (value >>> 56);
-        stream.put(eightByteArray, 0, 8);
+        stream.write(eightByteArray, 0, 8);
     }
 
     public byte[] getLongBytes(long value) throws IOException {
@@ -68,22 +79,36 @@ public class BinCodeSerialize {
         fourByteArray[1] = (byte) (intValue >>> 8);
         fourByteArray[2] = (byte) (intValue >>> 16);
         fourByteArray[3] = (byte) (intValue >>> 24);
-        stream.put(fourByteArray, 0, 4);
+        stream.write(fourByteArray, 0, 4);
     }
 
     public void setBytes(byte[] bytes) throws IOException {
-        stream.put(bytes, 0, bytes.length);
+        stream.write(bytes, 0, bytes.length);
     }
 
     public byte[] getBytes() {
 
-        stream.flip();
-        return Arrays.copyOfRange(
-                stream.array(),
-                stream.arrayOffset() + stream.position(),
-                stream.arrayOffset() + stream.limit()
-        );
+        return stream.toByteArray();
+//        stream.flip();
+//        return Arrays.copyOfRange(
+//                stream.array(),
+//                stream.arrayOffset() + stream.position(),
+//                stream.arrayOffset() + stream.limit()
+//        );
 
+//        byte[] result = new byte[stream.remaining()];
+//
+//        // 将数据从堆外内存复制到堆内数组
+//        stream.get(result);
+//
+//        // 如果需要保留原始缓冲区的位置，可以这样做：
+//        int originalPosition = stream.position();
+//        stream.position(0); // 或您需要的位置
+//        stream.get(result);
+//        stream.position(originalPosition);
+
+
+//        return result;
     }
 
 }
